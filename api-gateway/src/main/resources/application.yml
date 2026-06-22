@@ -1,0 +1,112 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      routes:
+        # Clientes
+        - id: service-clientes
+          uri: http://localhost:8082
+          predicates:
+            - Path=/clientes/**, /tipos-cliente/**, /clientes-api/v3/api-docs
+          filters:
+            - RewritePath=/clientes-api/(?<segment>.*), /${segment}
+
+        # Agendamiento
+        - id: service-agendamiento
+          uri: http://localhost:8083
+          predicates:
+            - Path=/api/v1/citas/**, /agendamiento-api/v3/api-docs
+          filters:
+            - RewritePath=/agendamiento-api/(?<segment>.*), /${segment}
+
+        # Barberos
+        - id: service-barberos
+          uri: http://localhost:8084
+          predicates:
+            - Path=/api/v1/barberos/**, /api/v1/especialidades/**, /barberos-api/v3/api-docs
+          filters:
+            - RewritePath=/barberos-api/(?<segment>.*), /${segment}
+
+        # Servicios
+        - id: service-servicios
+          uri: http://localhost:8085
+          predicates:
+            - Path=/api/v1/servicios/**, /servicios-api/v3/api-docs
+          filters:
+            - RewritePath=/servicios-api/(?<segment>.*), /${segment}
+
+        # Pagos
+        - id: service-pagos
+          uri: http://localhost:8086
+          predicates:
+            - Path=/api/v1/pagos/**, /pagos-api/v3/api-docs
+          filters:
+            - RewritePath=/pagos-api/(?<segment>.*), /${segment}
+
+        # Sucursales
+        - id: service-sucursales
+          uri: http://localhost:8087
+          predicates:
+            - Path=/sucursales/**, /sucursales-api/v3/api-docs
+          filters:
+            - RewritePath=/sucursales-api/(?<segment>.*), /${segment}
+
+        # Resenas
+        - id: service-resenas
+          uri: http://localhost:8088
+          predicates:
+            - Path=/resenas/**, /resenas-api/v3/api-docs
+          filters:
+            - RewritePath=/resenas-api/(?<segment>.*), /${segment}
+
+        # Promociones
+        - id: service-promociones
+          uri: http://localhost:8089
+          predicates:
+            - Path=/promociones/**, /promociones-api/v3/api-docs
+          filters:
+            - RewritePath=/promociones-api/(?<segment>.*), /${segment}
+
+        # Inventario
+        - id: service-inventario
+          uri: http://localhost:8090
+          predicates:
+            - Path=/inventario/**, /inventario-api/v3/api-docs
+          filters:
+            - RewritePath=/inventario-api/(?<segment>.*), /${segment}
+
+        # Empleados
+        - id: service-empleados
+          uri: http://localhost:8091
+          predicates:
+            - Path=/empleados/**, /empleados-api/v3/api-docs
+          filters:
+            - RewritePath=/empleados-api/(?<segment>.*), /${segment}
+
+springdoc:
+  swagger-ui:
+    urls:
+      - name: Clientes Service
+        url: /clientes-api/v3/api-docs
+      - name: Agendamiento Service
+        url: /agendamiento-api/v3/api-docs
+      - name: Barberos Service
+        url: /barberos-api/v3/api-docs
+      - name: Servicios Service
+        url: /servicios-api/v3/api-docs
+      - name: Pagos Service
+        url: /pagos-api/v3/api-docs
+      - name: Sucursales Service
+        url: /sucursales-api/v3/api-docs
+      - name: Resenas Service
+        url: /resenas-api/v3/api-docs
+      - name: Promociones Service
+        url: /promociones-api/v3/api-docs
+      - name: Inventario Service
+        url: /inventario-api/v3/api-docs
+      - name: Empleados Service
+        url: /empleados-api/v3/api-docs
