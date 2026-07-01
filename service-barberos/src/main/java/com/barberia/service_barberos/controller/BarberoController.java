@@ -46,7 +46,7 @@ public class BarberoController {
 
     @PostMapping("/login")
     public ResponseEntity<Barbero> login(@RequestBody java.util.Map<String, String> credentials) {
-        Barbero b = barberoService.login(credentials.get("run"), credentials.get("password"));
+        Barbero b = barberoService.login(credentials.get("correo"), credentials.get("password"));
         if (b != null) {
             return ResponseEntity.ok(b);
         }

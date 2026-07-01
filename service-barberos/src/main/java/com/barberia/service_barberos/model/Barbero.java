@@ -22,6 +22,7 @@ public class Barbero {
 
     private String nombre;
     private String run;
+    private String correo;
     
     private String password;
     private String rol = "BARBERO";

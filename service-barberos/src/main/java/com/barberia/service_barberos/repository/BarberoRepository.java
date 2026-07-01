@@ -12,5 +12,5 @@ public interface BarberoRepository extends JpaRepository<Barbero, Long> {
 
     List<Barbero> findByEspecialidadId(Long especialidadId);
 
-    Barbero findByRunAndPassword(String run, String password);
+    Barbero findByCorreoAndPassword(String correo, String password);
 }
