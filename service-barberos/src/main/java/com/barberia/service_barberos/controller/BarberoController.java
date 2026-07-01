@@ -43,4 +43,13 @@ public class BarberoController {
         }
         return ResponseEntity.ok(b);
     }
+
+    @PostMapping("/login")
+    public ResponseEntity<Barbero> login(@RequestBody java.util.Map<String, String> credentials) {
+        Barbero b = barberoService.login(credentials.get("run"), credentials.get("password"));
+        if (b != null) {
+            return ResponseEntity.ok(b);
+        }
+        return ResponseEntity.status(401).build();
+    }
 }

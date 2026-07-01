@@ -38,4 +38,8 @@ public class ClienteService {
     public void eliminar(Long id) {
         clienteRepository.deleteById(id);
     }
+
+    public Cliente login(String correo, String password) {
+        return clienteRepository.findByCorreoAndPassword(correo, password);
+    }
 }

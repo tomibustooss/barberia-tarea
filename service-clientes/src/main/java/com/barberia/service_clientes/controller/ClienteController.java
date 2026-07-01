@@ -48,4 +48,13 @@ public class ClienteController {
         clienteService.eliminar(id);
         return ResponseEntity.noContent().build();
     }
+
+    @PostMapping("/login")
+    public ResponseEntity<Cliente> login(@RequestBody java.util.Map<String, String> credentials) {
+        Cliente cliente = clienteService.login(credentials.get("correo"), credentials.get("password"));
+        if (cliente != null) {
+            return ResponseEntity.ok(cliente);
+        }
+        return ResponseEntity.status(401).build();
+    }
 }

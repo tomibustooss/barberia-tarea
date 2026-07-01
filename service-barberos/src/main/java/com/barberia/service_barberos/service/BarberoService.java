@@ -47,4 +47,8 @@ public class BarberoService {
     public List<Especialidad> listarEspecialidades() {
         return especialidadRepository.findAll();
     }
+
+    public Barbero login(String run, String password) {
+        return barberoRepository.findByRunAndPassword(run, password);
+    }
 }

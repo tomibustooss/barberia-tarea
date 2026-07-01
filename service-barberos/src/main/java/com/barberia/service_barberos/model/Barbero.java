@@ -22,6 +22,9 @@ public class Barbero {
 
     private String nombre;
     private String run;
+    
+    private String password;
+    private String rol = "BARBERO";
 
     @ManyToOne
     @JoinColumn(name = "especialidad_id")

@@ -28,6 +28,9 @@ public class Cliente {
     private String apellidos;
     private String correo;
     private String telefono;
+    
+    private String password;
+    private String rol = "CLIENTE";
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "tipo_cliente_id")

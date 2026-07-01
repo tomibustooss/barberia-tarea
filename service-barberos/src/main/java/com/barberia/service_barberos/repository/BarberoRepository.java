@@ -11,4 +11,6 @@ import com.barberia.service_barberos.model.Barbero;
 public interface BarberoRepository extends JpaRepository<Barbero, Long> {
 
     List<Barbero> findByEspecialidadId(Long especialidadId);
+
+    Barbero findByRunAndPassword(String run, String password);
 }
