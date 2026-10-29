@@ -74,8 +74,19 @@ export const getAppointments = async (clientId = 1) => {
 
   const localAppointments = readLocalAppointments().filter((appointment) => Number(appointment.clienteId) === Number(clientId));
   const combined = [...(Array.isArray(remoteAppointments) ? remoteAppointments : []), ...localAppointments];
+  const appointmentsById = new Map();
+  const appointmentsWithoutId = [];
 
-  return combined;
+  combined.forEach((appointment) => {
+    if (appointment.id === undefined || appointment.id === null) {
+      appointmentsWithoutId.push(appointment);
+      return;
+    }
+
+    appointmentsById.set(String(appointment.id), appointment);
+  });
+
+  return [...appointmentsById.values(), ...appointmentsWithoutId];
 };
 
 export const createAppointment = async (payload) => {
