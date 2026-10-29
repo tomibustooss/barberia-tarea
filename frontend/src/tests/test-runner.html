@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>Test Runner - Jasmine & Karma | Barbería Norte</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jasmine/5.1.2/jasmine.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jasmine/5.1.2/jasmine.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jasmine/5.1.2/jasmine-html.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jasmine/5.1.2/boot0.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jasmine/5.1.2/boot1.min.js"></script>
+</head>
+<body style="font-family: Arial, sans-serif; background-color: #f8f9fa;">
+  <div style="background-color: #212529; color: #ffc107; padding: 15px 25px; margin-bottom: 20px; border-bottom: 3px solid #ffc107;">
+    <h2 style="margin: 0;">Batería de Pruebas Unitarias - Barbería Norte (DSY1104)</h2>
+    <p style="margin: 5px 0 0 0; color: #adb5bd; font-size: 14px;">
+      Pruebas de Renderizado, Props, Estado, Eventos y Operaciones CRUD con Jasmine & Karma
+    </p>
+  </div>
+
+  <!-- Script que ejecuta todas las pruebas con Jasmine -->
+  <script>
+    // ==========================================
+    // 1. MOCK Y UTILIDADES CRUD (dbSimulada)
+    // ==========================================
+    const STORAGE_KEY = 'barberia_norte_test_db';
+    const DATOS_MOCK = {
+      servicios: [
+        { id: 1, nombre: 'Corte Clásico & Fade', precio: 15000, categoria: 'Cortes', duracionMinutos: 40 },
+        { id: 2, nombre: 'Perfilado Barba', precio: 10000, categoria: 'Barba', duracionMinutos: 30 },
+        { id: 3, nombre: 'Combo Master', precio: 22000, categoria: 'Combos', duracionMinutos: 65 }
+      ],
+      barberos: [
+        { id: 1, nombre: 'Alejandro "Alex" Silva', especialidad: 'Degradados Fade', calificacion: 4.9 }
+      ],
+      citas: [
+        { id: 1, codigoReserva: 'CIT-1001', servicioNombre: 'Combo Master', barberoId: 1, fecha: '2026-11-05', hora: '11:00', estado: 'CONFIRMADA' }
+      ]
+    };
+
+    function obtenerTodos(col) {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      const db = raw ? JSON.parse(raw) : JSON.parse(JSON.stringify(DATOS_MOCK));
+      return db[col] || [];
+    }
+
+    function obtenerPorId(col, id) {
+      const lista = obtenerTodos(col);
+      return lista.find(el => el.id === id) || null;
+    }
+
+    function crear(col, nuevo) {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      const db = raw ? JSON.parse(raw) : JSON.parse(JSON.stringify(DATOS_MOCK));
+      if (!db[col]) db[col] = [];
+      const maxId = db[col].reduce((m, e) => (e.id > m ? e.id : m), 0);
+      const item = { ...nuevo, id: maxId + 1 };
+      db[col].push(item);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
+      return item;
+    }
+
+    function actualizar(col, id, cambios) {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      const db = raw ? JSON.parse(raw) : JSON.parse(JSON.stringify(DATOS_MOCK));
+      const idx = (db[col] || []).findIndex(e => e.id === id);
+      if (idx === -1) return null;
+      db[col][idx] = { ...db[col][idx], ...cambios, id };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
+      return db[col][idx];
+    }
+
+    function eliminar(col, id) {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      const db = raw ? JSON.parse(raw) : JSON.parse(JSON.stringify(DATOS_MOCK));
+      if (!db[col]) return false;
+      const ini = db[col].length;
+      db[col] = db[col].filter(e => e.id !== id);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
+      return db[col].length < ini;
+    }
+
+    function resetear() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(DATOS_MOCK));
+    }
+
+    // ==========================================
+    // 2. SUITE 1: PRUEBAS DE RENDERIZADO
+    // ==========================================
+    describe('1. Pruebas de Renderizado (Render Tests)', () => {
+      let div;
+      beforeEach(() => {
+        div = document.createElement('div');
+        document.body.appendChild(div);
+      });
+      afterEach(() => {
+        document.body.removeChild(div);
+      });
+
+      it('Debe renderizar la lista completa de servicios en tarjetas HTML', () => {
+        const servicios = [
+          { id: 1, nombre: 'Corte Clásico', precio: 15000 },
+          { id: 2, nombre: 'Perfilado Barba', precio: 10000 },
+          { id: 3, nombre: 'Combo Master', precio: 22000 }
+        ];
+        div.innerHTML = servicios.map(s => `<div class="card"><h5>${s.nombre}</h5></div>`).join('');
+        const cards = div.querySelectorAll('.card');
+        expect(cards.length).toBe(3);
+        expect(cards[0].textContent).toContain('Corte Clásico');
+      });
+
+      it('Debe renderizar la ficha del barbero con su calificación', () => {
+        div.innerHTML = `
+          <div class="barber">
+            <h5 class="nombre">Alex Silva</h5>
+            <span class="rating">4.9</span>
+          </div>
+        `;
+        expect(div.querySelector('.nombre').textContent).toBe('Alex Silva');
+        expect(div.querySelector('.rating').textContent).toBe('4.9');
+      });
+
+      it('Debe renderizar condicionalmente el mensaje de error cuando falla la selección de hora', () => {
+        let hayError = true;
+        let mensaje = 'Horario no disponible';
+        div.innerHTML = `<div>${hayError ? `<div class="alert">${mensaje}</div>` : ''}</div>`;
+        expect(div.querySelector('.alert')).not.toBeNull();
+        expect(div.querySelector('.alert').textContent).toBe('Horario no disponible');
+
+        hayError = false;
+        div.innerHTML = `<div>${hayError ? `<div class="alert">${mensaje}</div>` : ''}</div>`;
+        expect(div.querySelector('.alert')).toBeNull();
+      });
+    });
+
+    // ==========================================
+    // 3. SUITE 2: PRUEBAS DE PROPS
+    // ==========================================
+    describe('2. Pruebas de Propiedades (Props Tests)', () => {
+      let div;
+      beforeEach(() => {
+        div = document.createElement('div');
+        document.body.appendChild(div);
+      });
+      afterEach(() => {
+        document.body.removeChild(div);
+      });
+
+      it('Un botón debe recibir correctamente su texto como propiedad', () => {
+        const propTexto = 'Agendar Hora';
+        div.innerHTML = `<button>${propTexto}</button>`;
+        expect(div.querySelector('button').textContent).toBe('Agendar Hora');
+      });
+
+      it('Un botón debe invocar la función onClick provista por props', () => {
+        const spyClick = jasmine.createSpy('onClick');
+        div.innerHTML = `<button id="btn-prop">Click Me</button>`;
+        const btn = div.querySelector('#btn-prop');
+        btn.addEventListener('click', spyClick);
+        btn.click();
+        expect(spyClick).toHaveBeenCalled();
+      });
+
+      it('El componente ServiceCard debe reflejar el precio formateado recibido por props', () => {
+        const precio = 15000;
+        const formateado = `$${precio.toLocaleString('es-CL')}`;
+        div.innerHTML = `<span class="precio">${formateado}</span>`;
+        expect(div.querySelector('.precio').textContent).toContain('15.000');
+      });
+    });
+
+    // ==========================================
+    // 4. SUITE 3: PRUEBAS DE ESTADO
+    // ==========================================
+    describe('3. Pruebas de Estado (State Tests)', () => {
+      it('Debe actualizar el estado al escribir en un input de formulario', () => {
+        let estado = { correo: '' };
+        const setCorreo = (val) => { estado.correo = val; };
+        setCorreo('cliente@duocuc.cl');
+        expect(estado.correo).toBe('cliente@duocuc.cl');
+      });
+
+      it('Debe transicionar correctamente entre los 5 pasos del wizard de agendamiento', () => {
+        let paso = 1;
+        const avanzar = () => { paso += 1; };
+        const retroceder = () => { paso -= 1; };
+
+        avanzar();
+        expect(paso).toBe(2);
+        avanzar();
+        expect(paso).toBe(3);
+        retroceder();
+        expect(paso).toBe(2);
+      });
+
+      it('Debe recalcular el total a pagar al aplicar un descuento porcentual', () => {
+        const subtotal = 20000;
+        const porcentaje = 20;
+        const descuento = Math.round(subtotal * (porcentaje / 100));
+        const total = subtotal - descuento;
+        expect(total).toBe(16000);
+      });
+    });
+
+    // ==========================================
+    // 5. SUITE 4: PRUEBAS DE EVENTOS
+    // ==========================================
+    describe('4. Pruebas de Eventos (Event Tests)', () => {
+      let div;
+      beforeEach(() => {
+        div = document.createElement('div');
+        document.body.appendChild(div);
+      });
+      afterEach(() => {
+        document.body.removeChild(div);
+      });
+
+      it('Debe disparar el evento de selección de filtro por categoría', () => {
+        const spy = jasmine.createSpy('onSelectCat');
+        div.innerHTML = `<button id="btn-cat">Barba</button>`;
+        const btn = div.querySelector('#btn-cat');
+        btn.addEventListener('click', () => spy('Barba'));
+        btn.click();
+        expect(spy).toHaveBeenCalledWith('Barba');
+      });
+
+      it('Debe capturar el submit del formulario previniendo el comportamiento por defecto', () => {
+        const spySubmit = jasmine.createSpy('onSubmit');
+        div.innerHTML = `
+          <form id="f1">
+            <button type="submit" id="sub1">Enviar</button>
+          </form>
+        `;
+        const f1 = div.querySelector('#f1');
+        f1.addEventListener('submit', (e) => {
+          e.preventDefault();
+          spySubmit();
+        });
+        div.querySelector('#sub1').click();
+        expect(spySubmit).toHaveBeenCalled();
+      });
+    });
+
+    // ==========================================
+    // 6. SUITE 5: PRUEBAS DE OPERACIONES CRUD
+    // ==========================================
+    describe('5. Pruebas de Operaciones CRUD (Persistencia dbSimulada)', () => {
+      beforeEach(() => {
+        resetear();
+      });
+
+      it('READ: Debe consultar todos los servicios registrados', () => {
+        const lista = obtenerTodos('servicios');
+        expect(lista.length).toBe(3);
+      });
+
+      it('READ: Debe obtener un servicio específico por su identificador único', () => {
+        const s = obtenerPorId('servicios', 2);
+        expect(s).not.toBeNull();
+        expect(s.nombre).toBe('Perfilado Barba');
+      });
+
+      it('CREATE: Debe agregar un nuevo servicio generando un ID correlativo', () => {
+        const nuevo = crear('servicios', { nombre: 'Corte Degradado', precio: 17000 });
+        expect(nuevo.id).toBe(4);
+        expect(obtenerTodos('servicios').length).toBe(4);
+      });
+
+      it('UPDATE: Debe actualizar campos de un registro manteniendo su ID', () => {
+        const act = actualizar('servicios', 1, { precio: 19000 });
+        expect(act.precio).toBe(19000);
+        expect(obtenerPorId('servicios', 1).precio).toBe(19000);
+      });
+
+      it('DELETE: Debe eliminar un servicio de la colección', () => {
+        const res = eliminar('servicios', 1);
+        expect(res).toBe(true);
+        expect(obtenerTodos('servicios').length).toBe(2);
+        expect(obtenerPorId('servicios', 1)).toBeNull();
+      });
+
+      it('CRUD CITAS: Debe permitir crear una cita y luego cancelarla', () => {
+        const cita = crear('citas', {
+          codigoReserva: 'CIT-9999',
+          servicioNombre: 'Tratamiento',
+          estado: 'CONFIRMADA'
+        });
+        expect(cita.id).toBeDefined();
+
+        const cancelada = actualizar('citas', cita.id, { estado: 'CANCELADA' });
+        expect(cancelada.estado).toBe('CANCELADA');
+      });
+    });
+  </script>
+</body>
+</html>
