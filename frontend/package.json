@@ -1,0 +1,43 @@
+{
+  "name": "barberia-frontend",
+  "version": "2.0.0",
+  "description": "Frontend React para el Sistema de Gestión y Agendamiento de Barbería Norte - Evaluación 2 DSY1104",
+  "private": true,
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "karma start karma.conf.js --single-run",
+    "test:watch": "karma start karma.conf.js",
+    "test:browser": "start src/tests/test-runner.html"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "bootstrap": "^5.3.3",
+    "bootstrap-icons": "^1.11.3"
+  },
+  "devDependencies": {
+    "jasmine-core": "^5.1.2",
+    "karma": "^6.4.3",
+    "karma-jasmine": "^5.1.0",
+    "karma-chrome-launcher": "^3.2.0",
+    "karma-webpack": "^5.0.1",
+    "webpack": "^5.91.0",
+    "babel-loader": "^9.1.3",
+    "@babel/core": "^7.24.4",
+    "@babel/preset-env": "^7.24.4",
+    "@babel/preset-react": "^7.24.1"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}

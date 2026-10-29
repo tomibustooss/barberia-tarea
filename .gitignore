@@ -43,3 +43,16 @@ Thumbs.db
 # Local config overrides
 application-local.properties
 application-local.yml
+node_modules
+
+# Dependencias y herramientas locales
+node_modules/
+apache-maven-3.9.6/
+mariadb-10.11.2-winx64/
+
+# Archivos generados
+dist/
+*.log
+
+# Archivos temporales de Vite
+.vite/
